@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"time"
 
 	"github.com/miku/doicache"
 )
@@ -17,6 +18,7 @@ func main() {
 	flag.Parse()
 	cache := doicache.New(*databaseDir)
 	cache.Verbose = true
+	cache.TTL = 3 * time.Second
 	b, err := cache.Get("10.1103/PhysRevLett.118.140402")
 	if err != nil {
 		log.Fatal(err)

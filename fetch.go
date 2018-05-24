@@ -82,6 +82,12 @@ func (c *Cache) Get(key string) ([]byte, error) {
 	if err := json.Unmarshal(b, &entry); err != nil {
 		return nil, err
 	}
+	if entry.Date.Add(c.TTL).Before(time.Now()) {
+		if c.Verbose {
+			log.Println("entry expired")
+		}
+		return c.fetch(key)
+	}
 	return entry.Blob, err
 }
 
