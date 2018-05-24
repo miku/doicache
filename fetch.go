@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sethgrid/pester"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -117,7 +118,7 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := pester.Do(req)
 	if err != nil {
 		return nil, err
 	}
