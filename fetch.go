@@ -3,6 +3,7 @@ package doicache
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/syndtr/goleveldb/leveldb"
 )
+
+var ErrCannotResolve = errors.New("resolution failed")
 
 // ProtocolError keeps HTTP status codes.
 type ProtocolError struct {
@@ -182,5 +185,5 @@ func (c *Cache) Resolve(doi string) (string, error) {
 			return "", fmt.Errorf("unexpected payload for URL type: %T", v.Data)
 		}
 	}
-	return "", fmt.Errorf("could not resolve %s", doi)
+	return "", ErrCannotResolve
 }

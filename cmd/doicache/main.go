@@ -40,6 +40,10 @@ func main() {
 		if _, err := os.Stat(flag.Arg(0)); os.IsNotExist(err) {
 			for _, arg := range flag.Args() {
 				v, err := cache.Resolve(arg)
+				if err == doicache.ErrCannotResolve {
+					log.Printf("cannot resolve %s, skipping", arg)
+					continue
+				}
 				if err != nil {
 					switch t := err.(type) {
 					case doicache.ProtocolError:
@@ -73,7 +77,12 @@ func main() {
 			log.Fatal(err)
 		}
 		s = strings.TrimSpace(s)
+
 		v, err := cache.Resolve(s)
+		if err == doicache.ErrCannotResolve {
+			log.Printf("cannot resolve %s, skipping", s)
+			continue
+		}
 		if err != nil {
 			switch t := err.(type) {
 			case doicache.ProtocolError:
@@ -83,6 +92,7 @@ func main() {
 				log.Fatal(err)
 			}
 		}
+
 		fmt.Println(v)
 	}
 }
