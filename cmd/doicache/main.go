@@ -5,13 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/miku/doicache"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
