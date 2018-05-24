@@ -16,12 +16,19 @@ import (
 
 var (
 	databaseDir = flag.String("db", filepath.Join(doicache.UserHomeDir(), ".doicache/default"), "leveldb directory")
-	ttl         = flag.Duration("ttl", 24*time.Hour*120, "entry expiration")
+	ttl         = flag.Duration("ttl", 24*time.Hour*240, "entry expiration")
 	verbose     = flag.Bool("verbose", false, "be verbose")
+	showVersion = flag.Bool("version", false, "show version")
+	version     = "undefined"
 )
 
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("git-%s\n", version)
+		os.Exit(0)
+	}
 
 	cache := doicache.New(*databaseDir)
 	cache.Verbose = *verbose
