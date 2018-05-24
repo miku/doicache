@@ -14,6 +14,17 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// ProtocolError keeps HTTP status codes.
+type ProtocolError struct {
+	Location   string
+	Message    string
+	StatusCode int
+}
+
+func (e ProtocolError) Error() string {
+	return fmt.Sprintf("HTTP %d %s %s", e.StatusCode, e.Location)
+}
+
 // Response from doi.org/api/handles endpoint.
 type Response struct {
 	Handle       string `json:"handle"`
@@ -124,7 +135,7 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Failed with HTTP %d: %s", resp.StatusCode, u)
+		return nil, ProtocolError{StatusCode: resp.StatusCode, Location: u}
 	}
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, resp.Body); err != nil {

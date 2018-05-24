@@ -41,7 +41,13 @@ func main() {
 			for _, arg := range flag.Args() {
 				v, err := cache.Resolve(arg)
 				if err != nil {
-					log.Fatal(err)
+					switch t := err.(type) {
+					case doicache.ProtocolError:
+						log.Printf("got HTTP %d, skipping", t.StatusCode)
+						continue
+					default:
+						log.Fatal(err)
+					}
 				}
 				fmt.Println(v)
 			}
@@ -69,7 +75,13 @@ func main() {
 		s = strings.TrimSpace(s)
 		v, err := cache.Resolve(s)
 		if err != nil {
-			log.Fatal(err)
+			switch t := err.(type) {
+			case doicache.ProtocolError:
+				log.Printf("got HTTP %d, skipping", t.StatusCode)
+				continue
+			default:
+				log.Fatal(err)
+			}
 		}
 		fmt.Println(v)
 	}
