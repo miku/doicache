@@ -1,4 +1,4 @@
-# doicheck
+# doicache
 
 Check DOI values for validity via doi.org REST API:
 
@@ -50,19 +50,19 @@ An example API response:
 ```
 
 ```
-$ doicheck 10.1103/PhysRevLett.118.140402
+$ doicache 10.1103/PhysRevLett.118.140402
 ```
 
 Check all entries in a file:
 
 ```
-$ doicheck -f list.csv
+$ doicache -f list.csv
 ```
 
 Caches all responses in a local sqlite3 database under
-`~/.config/doicheck/doi.db` - where the blob and the timestamp is recorded.
+`~/.config/doicache/doi.db` - where the blob and the timestamp is recorded.
 
-By default `doicheck` will query the local database first with some default
+By default `doicache` will query the local database first with some default
 expiration time. To force a database update, use `-force`.
 
 ## Implementation
