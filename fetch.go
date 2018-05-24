@@ -13,6 +13,19 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// Response from doi.org/api/handles endpoint.
+type Response struct {
+	Handle       string `json:"handle"`
+	ResponseCode int64  `json:"responseCode"`
+	Values       []struct {
+		Data      interface{} `json:"data"`
+		Index     int64       `json:"index"`
+		Timestamp string      `json:"timestamp"`
+		Ttl       int64       `json:"ttl"`
+		Type      string      `json:"type"`
+	} `json:"values"`
+}
+
 // Entry to cache. Contains raw bytes of response and some metadata.
 type Entry struct {
 	Date time.Time
@@ -130,4 +143,32 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	// XXX: Annotate bytes with date.
 	return buf.Bytes(), c.db.Put([]byte(key), b, nil)
 
+}
+
+// Resolve returns the redirect URL for a given DOI.
+func (c *Cache) Resolve(doi string) (string, error) {
+	b, err := c.Get(doi)
+	if err != nil {
+		return "", err
+	}
+	var resp Response
+	if err := json.Unmarshal(b, &resp); err != nil {
+		return "", err
+	}
+	for _, v := range resp.Values {
+		if v.Type != "URL" {
+			continue
+		}
+		switch t := v.Data.(type) {
+		case map[string]interface{}:
+			if v, ok := t["value"]; ok {
+				return fmt.Sprintf("%s", v), nil
+			} else {
+				return "", fmt.Errorf("value key missing")
+			}
+		default:
+			return "", fmt.Errorf("unexpected payload for URL type: %T", v.Data)
+		}
+	}
+	return "", fmt.Errorf("could not resolve %s", doi)
 }
