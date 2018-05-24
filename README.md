@@ -1,10 +1,39 @@
 # doicache
 
-Check DOI values for validity via doi.org REST API:
+Keep a local cache of DOI API responses.
 
-* https://www.doi.org/factsheets/DOIProxy.html#rest-api
+```shell
+$ doicache 10.1103/PhysRevLett.118.140402
+http://link.aps.org/doi/10.1103/PhysRevLett.118.140402
+```
 
-An example API response:
+Dump all keys:
+
+```
+$ doicache -dk
+10.1103/PhysRevLett.118.140402
+```
+
+Adjust expiration date:
+
+```
+$ doicache -verbose -ttl 1s 10.1103/PhysRevLett.118.140402
+INFO[0000] entry expired
+INFO[0000] https://doi.org/api/handles/10.1103/PhysRevLett.118.140402
+INFO[0001] {"Date":"2018-05-25T01:19:02.177003048+02:00","Blob":"eyJyZ..."}
+http://link.aps.org/doi/10.1103/PhysRevLett.118.140402
+```
+
+Read input from a file:
+
+```
+$ doicache < file
+```
+
+----
+
+API docs: https://www.doi.org/factsheets/DOIProxy.html#rest-api - an example
+response:
 
 ```
 {
@@ -49,39 +78,3 @@ An example API response:
 }
 ```
 
-```
-$ doicache 10.1103/PhysRevLett.118.140402
-```
-
-Check all entries in a file:
-
-```
-$ doicache -f list.csv
-```
-
-Caches all responses in a local sqlite3 database under
-`~/.config/doicache/doi.db` - where the blob and the timestamp is recorded.
-
-By default `doicache` will query the local database first with some default
-expiration time. To force a database update, use `-force`.
-
-## Implementation
-
-Test [dacap](https://github.com/ubleipzig/dacap) first.
-
-Create a struct:
-
-```
-$ curl -s doi.org/api/handles/10.1103/PhysRevLett.118.140402 | jq . | JSONGen
-type _ struct {
-    Handle       string `json:"handle"`
-    ResponseCode int64  `json:"responseCode"`
-    Values       []struct {
-        Data      interface{} `json:"data"`
-        Index     int64       `json:"index"`
-        Timestamp string      `json:"timestamp"`
-        Ttl       int64       `json:"ttl"`
-        Type      string      `json:"type"`
-    } `json:"values"`
-}
-```
