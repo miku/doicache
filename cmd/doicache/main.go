@@ -19,6 +19,7 @@ var (
 	ttl         = flag.Duration("ttl", 24*time.Hour*240, "entry expiration")
 	verbose     = flag.Bool("verbose", false, "be verbose")
 	showVersion = flag.Bool("version", false, "show version")
+	dumpKeys    = flag.Bool("dk", false, "dump keys")
 	version     = "undefined"
 )
 
@@ -33,6 +34,13 @@ func main() {
 	cache := doicache.New(*databaseDir)
 	cache.Verbose = *verbose
 	cache.TTL = *ttl
+
+	if *dumpKeys {
+		if err := cache.DumpKeys(os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(0)
+	}
 
 	var reader io.Reader = os.Stdin
 

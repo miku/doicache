@@ -187,3 +187,19 @@ func (c *Cache) Resolve(doi string) (string, error) {
 	}
 	return "", ErrCannotResolve
 }
+
+// DumpKeys writes all keys to the writer, one per line.
+func (c *Cache) DumpKeys(w io.Writer) error {
+	if err := c.openDatabase(); err != nil {
+		return err
+	}
+	iter := c.db.NewIterator(nil, nil)
+	for iter.Next() {
+		key := iter.Key() // value := iter.Value()
+		if _, err := io.WriteString(w, fmt.Sprintf("%s\n", key)); err != nil {
+			return err
+		}
+	}
+	iter.Release()
+	return iter.Error()
+}
