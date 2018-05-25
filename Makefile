@@ -6,3 +6,8 @@ doicache: cmd/doicache/main.go fetch.go home.go
 
 clean:
 	rm -f doicache
+
+install: doicache
+	mkdir -p $(HOME)/bin
+	cp $< $(HOME)/bin
+
