@@ -54,24 +54,7 @@ func main() {
 
 	if flag.NArg() > 0 {
 		if _, err := os.Stat(flag.Arg(0)); os.IsNotExist(err) {
-			for _, arg := range flag.Args() {
-				v, err := cache.Resolve(arg)
-				if err == doicache.ErrCannotResolve {
-					log.Printf("cannot resolve %s, skipping", arg)
-					continue
-				}
-				if err != nil {
-					switch t := err.(type) {
-					case doicache.ProtocolError:
-						log.Printf("got HTTP %d, skipping %s", t.StatusCode, arg)
-						continue
-					default:
-						log.Fatal(err)
-					}
-				}
-				fmt.Println(v)
-			}
-			os.Exit(0)
+			reader = strings.NewReader(strings.Join(flag.Args(), "\n") + "\n")
 		} else {
 			f, err := os.Open(flag.Arg(0))
 			if err != nil {
@@ -83,6 +66,7 @@ func main() {
 	}
 
 	br := bufio.NewReader(reader)
+	var status string
 
 	for {
 		s, err := br.ReadString('\n')
@@ -93,22 +77,20 @@ func main() {
 			log.Fatal(err)
 		}
 		s = strings.TrimSpace(s)
+		status = "OK"
 
 		v, err := cache.Resolve(s)
 		if err == doicache.ErrCannotResolve {
-			log.Printf("cannot resolve %s, skipping", s)
-			continue
+			status = "NOR"
 		}
 		if err != nil {
 			switch t := err.(type) {
 			case doicache.ProtocolError:
-				log.Printf("got HTTP %d, skipping: %s", t.StatusCode, s)
-				continue
+				status = fmt.Sprintf("H%d", t.StatusCode)
 			default:
 				log.Fatal(err)
 			}
 		}
-
-		fmt.Println(v)
+		fmt.Printf("%s\t%s\t%s\n", status, s, v)
 	}
 }
