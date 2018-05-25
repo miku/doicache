@@ -12,3 +12,4 @@
 *.out
 
 /doicache
+/fixtures/list
