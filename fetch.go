@@ -21,7 +21,7 @@ var (
 	ErrMissingValueKey = errors.New("missing value key")
 	ErrInvalidURL      = errors.New("invalid URL")
 
-	Newline = byte('n')
+	Endpoint = "https://doi.org/api/handles"
 )
 
 // ProtocolError keeps HTTP status codes.
@@ -91,7 +91,7 @@ func New(filename string) *Cache {
 
 // NewTTL creates a new cache with a default expiration date.
 func NewTTL(filename string, ttl time.Duration) *Cache {
-	return &Cache{name: filename, TTL: ttl, Endpoint: "https://doi.org/api/handles"}
+	return &Cache{name: filename, TTL: ttl, Endpoint: Endpoint}
 }
 
 // openDatabase will open or create the database.

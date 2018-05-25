@@ -7,6 +7,24 @@ $ doicache 10.1103/PhysRevLett.118.140402
 http://link.aps.org/doi/10.1103/PhysRevLett.118.140402
 ```
 
+## Usage
+
+```shell
+Usage of doicache:
+  -db string
+        leveldb directory (default "/tmp/.doicache/default")
+  -dk
+        dump keys
+  -dkv
+        dump keys and redirects
+  -ttl duration
+        entry expiration (default 5760h0m0s)
+  -verbose
+        be verbose
+  -version
+        show version
+```
+
 Dump all keys:
 
 ```
@@ -77,4 +95,3 @@ response:
   ]
 }
 ```
-
