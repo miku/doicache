@@ -19,6 +19,8 @@ var (
 	ErrCannotResolve   = errors.New("resolution failed")
 	ErrMissingURLValue = errors.New("missing URL redirect entry")
 	ErrMissingValueKey = errors.New("missing value key")
+
+	Newline = byte('n')
 )
 
 // ProtocolError keeps HTTP status codes.
@@ -157,11 +159,11 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	}
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot create request: %v", err)
 	}
 	resp, err := pester.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("request failed: %v", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
@@ -182,7 +184,6 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	if c.Verbose {
 		log.Println(string(b))
 	}
-	// XXX: Annotate bytes with date.
 	return buf.Bytes(), c.db.Put([]byte(key), b, nil)
 
 }
@@ -207,8 +208,8 @@ func (c *Cache) DumpKeys(w io.Writer) error {
 	}
 	iter := c.db.NewIterator(nil, nil)
 	for iter.Next() {
-		key := iter.Key() // value := iter.Value()
-		if _, err := io.WriteString(w, fmt.Sprintf("%s\n", key)); err != nil {
+		key := iter.Key()
+		if _, err := w.Write(append(key, Newline)); err != nil {
 			return err
 		}
 	}
@@ -235,11 +236,11 @@ func (c *Cache) DumpKeyValues(w io.Writer) error {
 		var s string
 		switch {
 		case err == ErrMissingURLValue:
-			s = fmt.Sprintf("%s\tErrMissingURLValue\n", key)
+			s = string(key) + "\tErrMissingURLValue\n"
 		case err != nil:
 			return err
 		default:
-			s = fmt.Sprintf("%s\t%s\n", key, redirect)
+			s = string(key) + "\t" + redirect + "\n"
 		}
 		if _, err := io.WriteString(w, s); err != nil {
 			return err
