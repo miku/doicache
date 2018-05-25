@@ -19,6 +19,7 @@ var (
 	ErrCannotResolve   = errors.New("resolution failed")
 	ErrMissingURLValue = errors.New("missing URL redirect entry")
 	ErrMissingValueKey = errors.New("missing value key")
+	ErrInvalidURL      = errors.New("invalid URL")
 
 	Newline = byte('n')
 )
@@ -159,7 +160,8 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	}
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
-		return nil, fmt.Errorf("cannot create request: %v", err)
+		log.Println(u)
+		return nil, ErrInvalidURL
 	}
 	resp, err := pester.Do(req)
 	if err != nil {

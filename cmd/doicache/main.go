@@ -80,16 +80,21 @@ func main() {
 		status = "OK"
 
 		v, err := cache.Resolve(s)
-		if err == doicache.ErrCannotResolve {
+		switch {
+		case err == doicache.ErrCannotResolve:
 			status = "NOR"
-		}
-		if err != nil {
+		case err == doicache.ErrInvalidURL:
+			status = "EURL"
+		case err != nil:
 			switch t := err.(type) {
 			case doicache.ProtocolError:
 				status = fmt.Sprintf("H%d", t.StatusCode)
 			default:
 				log.Fatal(err)
 			}
+		}
+		if v == "" {
+			v = "NOTAVAILABLE"
 		}
 		fmt.Printf("%s\t%s\t%s\n", status, s, v)
 	}
