@@ -212,7 +212,7 @@ func (c *Cache) DumpKeys(w io.Writer) error {
 	iter := c.db.NewIterator(nil, nil)
 	for iter.Next() {
 		key := iter.Key()
-		if _, err := w.Write(append(key, Newline)); err != nil {
+		if _, err := io.WriteString(w, string(key)+"\n"); err != nil {
 			return err
 		}
 	}
