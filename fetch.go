@@ -151,7 +151,7 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	if err := c.openDatabase(); err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s/%s", strings.TrimRight(c.Endpoint, "/"), key)
+	u := strings.TrimRight(c.Endpoint, "/") + "/" + key
 	if c.Verbose {
 		log.Println(u)
 	}
