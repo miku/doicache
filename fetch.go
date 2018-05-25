@@ -158,6 +158,7 @@ func (c *Cache) fetch(key string) ([]byte, error) {
 	if c.Verbose {
 		log.Println(u)
 	}
+	// https://tools.ietf.org/html/rfc3986#section-2.1
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		log.Println(u)
