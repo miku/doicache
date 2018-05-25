@@ -15,6 +15,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// ErrCannotResolve for general errors.
 var ErrCannotResolve = errors.New("resolution failed")
 
 // ProtocolError keeps HTTP status codes.
@@ -25,7 +26,7 @@ type ProtocolError struct {
 }
 
 func (e ProtocolError) Error() string {
-	return fmt.Sprintf("HTTP %d %s %s", e.StatusCode, e.Location)
+	return fmt.Sprintf("HTTP %d %s %s", e.StatusCode, e.Location, e.Message)
 }
 
 // Response from doi.org/api/handles endpoint.
@@ -36,9 +37,29 @@ type Response struct {
 		Data      interface{} `json:"data"`
 		Index     int64       `json:"index"`
 		Timestamp string      `json:"timestamp"`
-		Ttl       int64       `json:"ttl"`
+		TTL       int64       `json:"ttl"`
 		Type      string      `json:"type"`
 	} `json:"values"`
+}
+
+// RedirectURL returns the first data value of a URL type value.
+func (r Response) RedirectURL() (string, error) {
+	for _, value := range r.Values {
+		if value.Type != "URL" {
+			continue
+		}
+		switch t := value.Data.(type) {
+		case map[string]interface{}:
+			if v, ok := t["value"]; ok {
+				return fmt.Sprintf("%s", v), nil
+			} else {
+				return "", fmt.Errorf("missing value key")
+			}
+		default:
+			return "", fmt.Errorf("unexpected payload for URL type: %T", value.Data)
+		}
+	}
+	return "", fmt.Errorf("missing URL type value")
 }
 
 // Entry to cache. Contains raw bytes of response and some metadata.
@@ -95,6 +116,9 @@ func (c *Cache) Name() string {
 	return c.name
 }
 
+// Get retrieves the blob associated with a key. This will go out to doi.org,
+// if the value has not been found in the local database or the local copy has
+// expired.
 func (c *Cache) Get(key string) ([]byte, error) {
 	if err := c.openDatabase(); err != nil {
 		return nil, err
@@ -119,7 +143,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 	return entry.Blob, err
 }
 
-// Fetch object from server.
+// fetch fetches a response from doi.org.
 func (c *Cache) fetch(key string) ([]byte, error) {
 	if err := c.openDatabase(); err != nil {
 		return nil, err
@@ -170,22 +194,7 @@ func (c *Cache) Resolve(doi string) (string, error) {
 	if err := json.Unmarshal(b, &resp); err != nil {
 		return "", err
 	}
-	for _, v := range resp.Values {
-		if v.Type != "URL" {
-			continue
-		}
-		switch t := v.Data.(type) {
-		case map[string]interface{}:
-			if v, ok := t["value"]; ok {
-				return fmt.Sprintf("%s", v), nil
-			} else {
-				return "", fmt.Errorf("value key missing")
-			}
-		default:
-			return "", fmt.Errorf("unexpected payload for URL type: %T", v.Data)
-		}
-	}
-	return "", ErrCannotResolve
+	return resp.RedirectURL()
 }
 
 // DumpKeys writes all keys to the writer, one per line.
@@ -197,6 +206,34 @@ func (c *Cache) DumpKeys(w io.Writer) error {
 	for iter.Next() {
 		key := iter.Key() // value := iter.Value()
 		if _, err := io.WriteString(w, fmt.Sprintf("%s\n", key)); err != nil {
+			return err
+		}
+	}
+	iter.Release()
+	return iter.Error()
+}
+
+func (c *Cache) DumpKeyValues(w io.Writer) error {
+	if err := c.openDatabase(); err != nil {
+		return err
+	}
+	iter := c.db.NewIterator(nil, nil)
+	for iter.Next() {
+		key, b := iter.Key(), iter.Value()
+		var entry Entry
+		if err := json.Unmarshal(b, &entry); err != nil {
+			return err
+		}
+		var payload Response
+		if err := json.Unmarshal(entry.Blob, &payload); err != nil {
+			return err
+		}
+		redirect, err := payload.RedirectURL()
+		if err != nil {
+			return err
+		}
+		s := fmt.Sprintf("%s\t%s\n", key, redirect)
+		if _, err := io.WriteString(w, s); err != nil {
 			return err
 		}
 	}

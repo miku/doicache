@@ -15,12 +15,13 @@ import (
 )
 
 var (
-	databaseDir = flag.String("db", filepath.Join(doicache.UserHomeDir(), ".doicache/default"), "leveldb directory")
-	ttl         = flag.Duration("ttl", 24*time.Hour*240, "entry expiration")
-	verbose     = flag.Bool("verbose", false, "be verbose")
-	showVersion = flag.Bool("version", false, "show version")
-	dumpKeys    = flag.Bool("dk", false, "dump keys")
-	version     = "undefined"
+	databaseDir   = flag.String("db", filepath.Join(doicache.UserHomeDir(), ".doicache/default"), "leveldb directory")
+	ttl           = flag.Duration("ttl", 24*time.Hour*240, "entry expiration")
+	verbose       = flag.Bool("verbose", false, "be verbose")
+	showVersion   = flag.Bool("version", false, "show version")
+	dumpKeys      = flag.Bool("dk", false, "dump keys")
+	dumpKeyValues = flag.Bool("dkv", false, "dump keys and redirects")
+	version       = "undefined"
 )
 
 func main() {
@@ -37,6 +38,13 @@ func main() {
 
 	if *dumpKeys {
 		if err := cache.DumpKeys(os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(0)
+	}
+
+	if *dumpKeyValues {
+		if err := cache.DumpKeyValues(os.Stdout); err != nil {
 			log.Fatal(err)
 		}
 		os.Exit(0)
