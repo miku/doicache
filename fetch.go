@@ -15,8 +15,11 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-// ErrCannotResolve for general errors.
-var ErrCannotResolve = errors.New("resolution failed")
+var (
+	ErrCannotResolve   = errors.New("resolution failed")
+	ErrMissingURLValue = errors.New("missing URL redirect entry")
+	ErrMissingValueKey = errors.New("missing value key")
+)
 
 // ProtocolError keeps HTTP status codes.
 type ProtocolError struct {
@@ -53,13 +56,13 @@ func (r Response) RedirectURL() (string, error) {
 			if v, ok := t["value"]; ok {
 				return fmt.Sprintf("%s", v), nil
 			} else {
-				return "", fmt.Errorf("missing value key")
+				return "", ErrMissingValueKey
 			}
 		default:
 			return "", fmt.Errorf("unexpected payload for URL type: %T", value.Data)
 		}
 	}
-	return "", fmt.Errorf("missing URL type value")
+	return "", ErrMissingURLValue
 }
 
 // Entry to cache. Contains raw bytes of response and some metadata.
@@ -229,10 +232,15 @@ func (c *Cache) DumpKeyValues(w io.Writer) error {
 			return err
 		}
 		redirect, err := payload.RedirectURL()
-		if err != nil {
+		var s string
+		switch {
+		case err == ErrMissingURLValue:
+			s = fmt.Sprintf("%s\tErrMissingURLValue\n", key)
+		case err != nil:
 			return err
+		default:
+			s = fmt.Sprintf("%s\t%s\n", key, redirect)
 		}
-		s := fmt.Sprintf("%s\t%s\n", key, redirect)
 		if _, err := io.WriteString(w, s); err != nil {
 			return err
 		}
