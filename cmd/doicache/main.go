@@ -63,7 +63,7 @@ func main() {
 				if err != nil {
 					switch t := err.(type) {
 					case doicache.ProtocolError:
-						log.Printf("got HTTP %d, skipping", t.StatusCode)
+						log.Printf("got HTTP %d, skipping %s", t.StatusCode, arg)
 						continue
 					default:
 						log.Fatal(err)
@@ -102,7 +102,7 @@ func main() {
 		if err != nil {
 			switch t := err.(type) {
 			case doicache.ProtocolError:
-				log.Printf("got HTTP %d, skipping", t.StatusCode)
+				log.Printf("got HTTP %d, skipping: %s", t.StatusCode, s)
 				continue
 			default:
 				log.Fatal(err)
