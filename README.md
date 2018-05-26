@@ -121,3 +121,40 @@ response:
   ]
 }
 ```
+
+TODO
+----
+
+* threaded requests
+* possible distribute requests among machines; create a drone (binary for
+  target system), send binary to target; let binary send back results.
+
+Distops
+-------
+
+Examples:
+
+* Distributed harvesters
+
+Interface:
+
+```
+func Mapper(b []byte) ([]byte, error) { ... }
+```
+
+This function can be distributed among threads or machines.
+
+A single reducer is run on the host:
+
+```
+func Reducer(b []byte) error { ... }
+```
+
+Input is a sequence of items, each represented at the lowest level as bytes,
+e.g. reading a file off disk line by line.
+
+* create target programs that can communicate (HTTP, gRPC)
+* host reads input, sends data to minions
+* host receives results and runs a reducer
+* various error policies
+
