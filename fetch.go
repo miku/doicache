@@ -220,6 +220,7 @@ func (c *Cache) DumpKeys(w io.Writer) error {
 	return iter.Error()
 }
 
+// DumpKeyValues writes status, url and redirect as tabbed values to writer.
 func (c *Cache) DumpKeyValues(w io.Writer) error {
 	if err := c.openDatabase(); err != nil {
 		return err

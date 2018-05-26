@@ -21,7 +21,9 @@ var (
 	showVersion   = flag.Bool("version", false, "show version")
 	dumpKeys      = flag.Bool("dk", false, "dump keys")
 	dumpKeyValues = flag.Bool("dkv", false, "dump keys and redirects")
-	version       = "undefined"
+
+	NotAvailable = "NOTAVAILABLE"
+	version      = "undefined"
 )
 
 func main() {
@@ -94,7 +96,7 @@ func main() {
 			}
 		}
 		if v == "" {
-			v = "NOTAVAILABLE"
+			v = NotAvailable
 		}
 		fmt.Printf("%s\t%s\t%s\n", status, s, v)
 	}
