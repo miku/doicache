@@ -87,6 +87,8 @@ func main() {
 			status = "NOR"
 		case err == doicache.ErrInvalidURL:
 			status = "EURL"
+		case err == doicache.ErrMissingURLValue:
+			status = "MURL"
 		case err != nil:
 			switch t := err.(type) {
 			case doicache.ProtocolError:
