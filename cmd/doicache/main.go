@@ -21,6 +21,7 @@ var (
 	showVersion   = flag.Bool("version", false, "show version")
 	dumpKeys      = flag.Bool("dk", false, "dump keys")
 	dumpKeyValues = flag.Bool("dkv", false, "dump keys and redirects")
+	bestEffort    = flag.Bool("b", false, "best effort, just log errors, do not hang")
 
 	NotAvailable = "NOTAVAILABLE"
 	version      = "undefined"
@@ -94,6 +95,10 @@ func main() {
 			case doicache.ProtocolError:
 				status = fmt.Sprintf("H%d", t.StatusCode)
 			default:
+				if *bestEffort {
+					log.Println(err)
+					continue
+				}
 				log.Fatal(err)
 			}
 		}
