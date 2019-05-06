@@ -7,6 +7,10 @@ $ doicache 10.1103/PhysRevLett.118.140402
 http://link.aps.org/doi/10.1103/PhysRevLett.118.140402
 ```
 
+## Prerelease binary
+
+* [https://github.com/miku/doicache/releases/tag/v0.0.f53f4ec](https://github.com/miku/doicache/releases/tag/v0.0.f53f4ec)
+
 ## Usage
 
 ```shell
