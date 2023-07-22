@@ -3,7 +3,9 @@ module github.com/miku/doicache
 go 1.12
 
 require (
-	github.com/sethgrid/pester v0.0.0-20190127155807-68a33a018ad0
-	github.com/sirupsen/logrus v1.4.1
+	github.com/golang/snappy v0.0.4 // indirect
+	github.com/sethgrid/pester v1.2.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/syndtr/goleveldb v1.0.0
+	golang.org/x/sys v0.10.0 // indirect
 )
