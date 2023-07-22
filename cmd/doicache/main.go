@@ -10,12 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/miku/doicache"
 	log "github.com/sirupsen/logrus"
 )
 
 var (
-	databaseDir   = flag.String("db", filepath.Join(doicache.UserHomeDir(), ".doicache/default"), "leveldb directory")
+	databaseDir   = flag.String("db", filepath.Join(xdg.CacheHome, "doicache", "default"), "leveldb directory")
 	ttl           = flag.Duration("ttl", 24*time.Hour*240, "entry expiration")
 	verbose       = flag.Bool("verbose", false, "be verbose")
 	showVersion   = flag.Bool("version", false, "show version")
